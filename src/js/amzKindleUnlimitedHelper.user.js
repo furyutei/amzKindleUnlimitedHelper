@@ -3,7 +3,7 @@
 // @name:ja         Kindle Unlimited 返却支援
 // @namespace       https://furyutei.work
 // @license         MIT
-// @version         0.1.0
+// @version         0.1.1
 // @description     Help with the return of Kindle Unlimited loans in Amazon.co.jp.
 // @description:ja  Amazon.co.jp の Kindle Unlimited の返却を支援
 // @author          furyu
@@ -26,7 +26,7 @@ const
     
     TIME_INTERVAL_TO_CONFIRM_RETURN_FIRST = 5000, // 初回返却確認までの遅延時間(ミリ秒)
     TIME_INTERVAL_TO_CONFIRM_RETURN = 1000, // 返却確認間隔(ミリ秒)
-    MAX_RETURN_CONFIRM_RETRY_NUMBER = 30, // 最大返却再確認回数
+    MAX_RETURN_CONFIRM_RETRY_NUMBER = 50, // 最大返却再確認回数
     
     get_log_timestamp = () => {
         return new Date().toISOString();
@@ -211,7 +211,7 @@ const
                                 sortOrder : 'DESCENDING',
                                 sortIndex : 'DATE',
                                 startIndex : 0,
-                                batchSize : 100, // default: 18
+                                batchSize : 100, // default: 18 / ～725あたりで不安定になる（GET https://www.amazon.co.jp/500 404）
                                 contentType : 'ALL',
                                 totalContentCount : 0,
                                 itemStatus : [ 'Active', ],
@@ -368,7 +368,7 @@ const
         button_action.removeAttribute( 'dummy-deliver-dmyx' );
         button_action.setAttribute( 'return-ku-dmyx', '' );
         pointer_myx.setAttribute( 'id', 'contentAction_return_ku_myx' );
-        action_text.textContent = 'すべて返却';
+        action_text.textContent = '返却';
         
         button_link.addEventListener( 'click', ( event ) => {
             event.preventDefault();
@@ -406,7 +406,7 @@ const
                     returned_asin_list.push( asin );
                 }
                 
-                log_debug( 'returned_asin_list=', returned_asin_list, returned_asin_list.length );
+                log_debug( returned_asin_list.length, 'returned_asin_list=', returned_asin_list );
                 
                 if ( returned_asin_list.length <= 0 ) {
                     log_error( 'No book returned' );
@@ -418,6 +418,7 @@ const
                 
                 // TODO: 返却をしたものが借用中リストから消えるまでタイムラグ有り
                 // →暫定的に、最大( 1 + MAX_RETURN_CONFIRM_RETRY_NUMBER ) 回確認することで対処
+                // TODO: 借用中リストからいったん消えたあと、再び現れることもある模様、対処困難なため保留
                 await wait( TIME_INTERVAL_TO_CONFIRM_RETURN_FIRST );
                 for ( let counter = 0; counter <= MAX_RETURN_CONFIRM_RETRY_NUMBER; counter ++ ) {
                     let loaned_info = await get_loaned_info(),
@@ -432,7 +433,7 @@ const
                         
                         removed_counter ++;
                     }
-                    log_debug( 'removed_counter=', removed_counter, loaned_info );
+                    log_debug( 'counter=', counter, 'removed_counter=', removed_counter, 'loaned_info=', loaned_info );
                     
                     if ( returned_asin_list.length <= removed_counter ) {
                         break;
@@ -491,7 +492,7 @@ const
                     let loaned_info = await get_loaned_info(),
                         loaned_book_info = get_loaned_book_info( asin, loaned_info );
                     
-                    log_debug( 'counter=', counter, loaned_info, loaned_book_info );
+                    log_debug( 'counter=', counter, 'loaned_info=', loaned_info, 'loaned_book_info=', loaned_book_info );
                     
                     if ( ! loaned_book_info ) {
                         break;

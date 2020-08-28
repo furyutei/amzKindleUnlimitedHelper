@@ -25,7 +25,7 @@
 
 ■ 使い方
 ---
-- [コンテンツページ](https://www.amazon.co.jp/hz/mycd/myx?ref_=nav_AccountFlyout_myk#/home/content/kuBooks/dateDsc/)では、返却したい本をチェック後、[すべて返却]ボタンを押す
+- [コンテンツページ](https://www.amazon.co.jp/hz/mycd/myx?ref_=nav_AccountFlyout_myk#/home/content/kuBooks/dateDsc/)では、返却したい本を選択（チェック）後、[返却]ボタンを押す
 - 個別ページでは、「利用開始しました」のところに表示される[返却]ボタンを押す
 
 
